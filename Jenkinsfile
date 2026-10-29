@@ -22,7 +22,7 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                bat 'docker build -t football-manager:1.0 .'
+                bat '"C:/Users/Darshan/AppData/Local/Programs/DockerDesktop/resources/bin/docker.exe" build -t football-manager:1.0 .'
             }
         }
     }
