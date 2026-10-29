@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: football-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: football-manager
+  template:
+    metadata:
+      labels:
+        app: football-manager
+    spec:
+      containers:
+        - name: football-manager
+          image: darshan1103/football-manager:1.0
+          ports:
+            - containerPort: 8080
