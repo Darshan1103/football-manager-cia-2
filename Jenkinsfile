@@ -40,23 +40,29 @@ pipeline {
                     variable: 'DOCKERHUB_TOKEN'
                 )]) {
                     powershell '''
+                        $docker = "C:/Users/Darshan/AppData/Local/Programs/DockerDesktop/resources/bin/docker.exe"
+                        $dockerConfig = Join-Path $env:WORKSPACE ".docker-config"
+
+                        New-Item -ItemType Directory -Force -Path $dockerConfig | Out-Null
+
                         $token = $env:DOCKERHUB_TOKEN
 
-                        Write-Host "Docker Hub username: darshan1103"
-                        Write-Host "Token received by Jenkins: $($token.Length) characters"
-
                         if ([string]::IsNullOrWhiteSpace($token)) {
-                            throw    "Docker Hub token is empty"
+                            throw "Docker Hub token is empty"
                         }
 
-                        $token | & "C:/Users/Darshan/AppData/Local/Programs/DockerDesktop/resources/bin/docker.exe" login -u darshan1103 --password-stdin
+                        $token | & $docker --config $dockerConfig login -u darshan1103 --password-stdin
 
                         if ($LASTEXITCODE -ne 0) {
-                            exit $LASTEXITCODE
+                            throw "Docker Hub login failed"
+                        }
+
+                        & $docker --config $dockerConfig push darshan1103/football-manager:1.0
+
+                        if ($LASTEXITCODE -ne 0) {
+                            throw "Docker Hub push failed"
                         }
                     '''
-
-                    bat '"C:/Users/Darshan/AppData/Local/Programs/DockerDesktop/resources/bin/docker.exe" push darshan1103/football-manager:1.0'
                 }
             }
         }
