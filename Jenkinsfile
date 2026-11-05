@@ -42,7 +42,14 @@ pipeline {
                     powershell '''
                         $token = $env:DOCKERHUB_TOKEN
 
-                        $token | & "C:/Users/Darshan/AppData/Local/Programs/DockerDesktop/resources/bin/docker.exe" login --username darshan1103 --password-stdin
+                        Write-Host "Docker Hub username: darshan1103"
+                        Write-Host "Token received by Jenkins: $($token.Length) characters"
+
+                        if ([string]::IsNullOrWhiteSpace($token)) {
+                            throw    "Docker Hub token is empty"
+                        }
+
+                        $token | & "C:/Users/Darshan/AppData/Local/Programs/DockerDesktop/resources/bin/docker.exe" login -u darshan1103 --password-stdin
 
                         if ($LASTEXITCODE -ne 0) {
                             exit $LASTEXITCODE
