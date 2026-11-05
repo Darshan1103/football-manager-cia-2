@@ -14,6 +14,14 @@ pipeline {
             }
         }
 
+        stage('Gitleaks Security Scan') {
+            steps {
+                bat '''
+                    "C:/Users/Darshan/AppData/Local/Programs/DockerDesktop/resources/bin/docker.exe" run --rm -v "%WORKSPACE%:/repo" zricethezav/gitleaks:latest detect --source=/repo --redact
+                '''
+            }
+        }
+
         stage('Build and Test') {
             steps {
                 bat 'mvnw.cmd clean package'
@@ -30,8 +38,8 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'dockerhub-creds',
-                    usernameVariable: 'darshan',
-                    passwordVariable: 'PAssword'
+                    usernameVariable: 'DOCKERHUB_USERNAME',
+                    passwordVariable: 'DOCKERHUB_TOKEN'
                 )]) {
                     bat '''
                         @echo off
