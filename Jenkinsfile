@@ -33,19 +33,16 @@ pipeline {
                 bat '"C:/Users/Darshan/AppData/Local/Programs/DockerDesktop/resources/bin/docker.exe" build -t darshan1103/football-manager:1.0 .'
             }
         }
-
         stage('Docker Hub Push') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-creds',
-                    usernameVariable: 'DOCKERHUB_USERNAME',
-                    passwordVariable: 'DOCKERHUB_TOKEN'
+                withCredentials([string(
+                    credentialsId: 'dockerhub-pat',
+                    variable: 'DOCKERHUB_TOKEN'
                 )]) {
                     powershell '''
-                        $ErrorActionPreference = "Stop"
+                        $token = $env:DOCKERHUB_TOKEN
 
-                        $env:DOCKERHUB_TOKEN |
-                            & "C:/Users/Darshan/AppData/Local/Programs/DockerDesktop/resources/bin/docker.exe" login --username $env:DOCKERHUB_USERNAME --password-stdin
+                        $token | & "C:/Users/Darshan/AppData/Local/Programs/DockerDesktop/resources/bin/docker.exe" login --username darshan1103 --password-stdin
 
                         if ($LASTEXITCODE -ne 0) {
                             exit $LASTEXITCODE
@@ -56,5 +53,6 @@ pipeline {
                 }
             }
         }
+
     }
 }
