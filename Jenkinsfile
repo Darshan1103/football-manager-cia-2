@@ -52,6 +52,7 @@ pipeline {
             }
         }
 
+
         stage('Docker Hub Push') {
             steps {
                 withCredentials([string(
@@ -60,21 +61,26 @@ pipeline {
                 )]) {
                     powershell '''
                         $docker = "C:/Users/Darshan/AppData/Local/Programs/DockerDesktop/resources/bin/docker.exe"
-                        $dockerConfig = Join-Path $env:WORKSPACE ".docker-config"
+
+                        $dockerConfig = Join-Path $env:WORKSPACE ".docker-config-test"
 
                         New-Item -ItemType Directory -Force -Path $dockerConfig | Out-Null
 
                         $token = $env:DOCKERHUB_TOKEN
 
-                        if ([string]::IsNullOrWhiteSpace($token)) {
-                            throw "Docker Hub token is empty"
-                        }
+                        Write-Host "Token length: $($token.Length)"
+                        Write-Host "Token starts with whitespace: $($token -match '^\\s')"
+                        Write-Host "Token ends with whitespace: $($token -match '\\s$')"
+
+                        $token = $token.Trim()
 
                         $token | & $docker --config $dockerConfig login -u darshan1103 --password-stdin
 
                         if ($LASTEXITCODE -ne 0) {
-                            throw "Docker Hub login failed"
+                            throw "Docker Hub authentication failed"
                         }
+
+                        Write-Host "Docker Hub authentication successful"
 
                         & $docker --config $dockerConfig push darshan1103/football-manager:1.0
 
@@ -85,6 +91,7 @@ pipeline {
                 }
             }
         }
+
 
     }
 }
