@@ -37,7 +37,7 @@ pipeline {
                 stage('Verify Docker Credential') {
             steps {
                 withCredentials([string(
-                    credentialsId: 'dockerhub-pat',
+                    credentialsId: 'dockerhub-pat-new',
                     variable: 'DOCKERHUB_TOKEN'
                 )]) {
                     powershell '''
@@ -51,11 +51,11 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Docker Hub Push') {
             steps {
                 withCredentials([string(
-                    credentialsId: 'dockerhub-pat',
+                    credentialsId: 'dockerhub-pat-new',
                     variable: 'DOCKERHUB_TOKEN'
                 )]) {
                     powershell '''
