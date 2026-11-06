@@ -34,23 +34,35 @@ pipeline {
             }
         }
 
-                stage('Verify Docker Credential') {
+
+        stage('Test Docker Hub Credential') {
             steps {
                 withCredentials([string(
                     credentialsId: 'dockerhub-pat-new',
                     variable: 'DOCKERHUB_TOKEN'
                 )]) {
                     powershell '''
+                        $docker = "C:/Users/Darshan/AppData/Local/Programs/DockerDesktop/resources/bin/docker.exe"
+                        $config = Join-Path $env:WORKSPACE ".docker-auth-test"
+
+                        New-Item -ItemType Directory -Force -Path $config | Out-Null
+
                         $token = $env:DOCKERHUB_TOKEN.Trim()
-                        $bytes = [System.Text.Encoding]::UTF8.GetBytes($token)
-                        $sha = [System.Security.Cryptography.SHA256]::Create()
-                        $hash = $sha.ComputeHash($bytes)
-                        $fingerprint = [BitConverter]::ToString($hash).Replace("-", "")
-                        Write-Host "Jenkins credential fingerprint: $fingerprint"
+
+                        $token | & $docker --config $config login `
+                            --username darshan1103 `
+                            --password-stdin
+
+                        if ($LASTEXITCODE -ne 0) {
+                            throw "Authentication rejected by Docker Hub"
+                        }
+
+                        Write-Host "AUTHENTICATION SUCCESSFUL"
                     '''
                 }
             }
         }
+
 
 
         stage('Docker Hub Push') {
