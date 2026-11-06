@@ -33,6 +33,25 @@ pipeline {
                 bat '"C:/Users/Darshan/AppData/Local/Programs/DockerDesktop/resources/bin/docker.exe" build -t darshan1103/football-manager:1.0 .'
             }
         }
+
+                stage('Verify Docker Credential') {
+            steps {
+                withCredentials([string(
+                    credentialsId: 'dockerhub-pat',
+                    variable: 'DOCKERHUB_TOKEN'
+                )]) {
+                    powershell '''
+                        $token = $env:DOCKERHUB_TOKEN.Trim()
+                        $bytes = [System.Text.Encoding]::UTF8.GetBytes($token)
+                        $sha = [System.Security.Cryptography.SHA256]::Create()
+                        $hash = $sha.ComputeHash($bytes)
+                        $fingerprint = [BitConverter]::ToString($hash).Replace("-", "")
+                        Write-Host "Jenkins credential fingerprint: $fingerprint"
+                    '''
+                }
+            }
+        }
+        
         stage('Docker Hub Push') {
             steps {
                 withCredentials([string(
@@ -62,24 +81,6 @@ pipeline {
                         if ($LASTEXITCODE -ne 0) {
                             throw "Docker Hub push failed"
                         }
-                    '''
-                }
-            }
-        }
-
-        stage('Verify Docker Credential') {
-            steps {
-                withCredentials([string(
-                    credentialsId: 'dockerhub-pat',
-                    variable: 'DOCKERHUB_TOKEN'
-                )]) {
-                    powershell '''
-                        $token = $env:DOCKERHUB_TOKEN.Trim()
-                        $bytes = [System.Text.Encoding]::UTF8.GetBytes($token)
-                        $sha = [System.Security.Cryptography.SHA256]::Create()
-                        $hash = $sha.ComputeHash($bytes)
-                        $fingerprint = [BitConverter]::ToString($hash).Replace("-", "")
-                        Write-Host "Jenkins credential fingerprint: $fingerprint"
                     '''
                 }
             }
